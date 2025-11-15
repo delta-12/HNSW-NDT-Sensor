@@ -1,6 +1,8 @@
 #ifndef SENSOR_H
 #define SENSOR_H
 
+#include "bsp_gpio_user.h"
+
 typedef enum
 {
     SENSOR_ADC_BIT_0,
@@ -16,9 +18,9 @@ typedef enum
 
 typedef struct
 {
-    int solenoid;
-    int adc_clock;
-    int adc_bits[SENSOR_ADC_BIT_MAX];
+    BspGpioUser_Pin_t solenoid;
+    BspGpioUser_Pin_t adc_clock;
+    BspGpioUser_Pin_t adc_bits[SENSOR_ADC_BIT_MAX];
 } Sensor_t;
 
 void Sensor_Initialize(const Sensor_t *const sensor);
