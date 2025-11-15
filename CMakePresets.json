@@ -1,0 +1,67 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 30,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+		    "toolchainFile": "${sourceDir}/toolchain.cmake",
+            "cacheVariables": {
+                "BOARD": "Nucleo-64",
+                "LINKER_SCRIPT": "stm32f411retx_flash.ld"
+            }
+        },
+        {
+            "name": "Nucleo-64_Debug",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "Nucleo-64_RelWithDebInfo",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "Nucleo-64_Release",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "Nucleo-64_MinSizeRel",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "MinSizeRel"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "Nucleo-64_Debug",
+            "configurePreset": "Nucleo-64_Debug"
+        },
+        {
+            "name": "Nucleo-64_RelWithDebInfo",
+            "configurePreset": "Nucleo-64_RelWithDebInfo"
+        },
+        {
+            "name": "Nucleo-64_Release",
+            "configurePreset": "Nucleo-64_Release"
+        },
+        {
+            "name": "Nucleo-64_MinSizeRel",
+            "configurePreset": "Nucleo-64_MinSizeRel"
+        }
+    ]
+}

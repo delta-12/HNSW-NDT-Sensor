@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<suppressions>
+
+    <!-- Suppress missing includes -->
+    <suppress>
+        <id>missingInclude</id>
+    </suppress>
+    <suppress>
+        <id>missingIncludeSystem</id>
+    </suppress>
+
+    <!-- Suppress unused functions -->
+    <suppress>
+        <id>unusedFunction</id>
+    </suppress>
+
+    <!-- Suppress double sign comparison portability error -->
+    <suppress>
+        <id>invalidPointerCast</id>
+        <fileName>*/bsp/src/bsp.c</fileName>
+    </suppress>
+
+</suppressions>
