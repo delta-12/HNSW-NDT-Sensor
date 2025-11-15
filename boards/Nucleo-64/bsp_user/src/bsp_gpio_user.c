@@ -28,8 +28,8 @@ Bsp_Gpio_t BspGpioUser_HandleTable[BSP_GPIO_USER_PIN_MAX] = {
         .previous = 0U,
     },
     [BSP_GPIO_USER_PIN_STEPPER_MOTOR_DIRECTION] = {
-        .gpio_port = LD2_GPIO_Port, /* TODO */
-        .gpio_pin  = LD2_Pin,       /* TODO */
+        .gpio_port = STEPPER_DIRECTION_GPIO_Port,
+        .gpio_pin  = STEPPER_DIRECTION_Pin,
         .mode      = BSP_GPIO_MODE_OUTPUT,
         .callback  = {
             .function = NULL,
@@ -39,8 +39,8 @@ Bsp_Gpio_t BspGpioUser_HandleTable[BSP_GPIO_USER_PIN_MAX] = {
         .previous = 0U,
     },
     [BSP_GPIO_USER_PIN_STEPPER_MOTOR_STEP] = {
-        .gpio_port = LD2_GPIO_Port, /* TODO */
-        .gpio_pin  = LD2_Pin,       /* TODO */
+        .gpio_port = STEPPER_STEP_GPIO_Port,
+        .gpio_pin  = STEPPER_STEP_Pin,
         .mode      = BSP_GPIO_MODE_OUTPUT,
         .callback  = {
             .function = NULL,
@@ -122,6 +122,26 @@ Bsp_Gpio_t BspGpioUser_HandleTable[BSP_GPIO_USER_PIN_MAX] = {
     [BSP_GPIO_USER_SENSOR_ADC_BIT_7] = {
         .gpio_port = SENSOR_BIT_7_GPIO_Port,
         .gpio_pin  = SENSOR_BIT_7_Pin,
+        .callback  = {
+            .function = NULL,
+            .arg      = NULL,
+        },
+        .debounce = 0U,
+        .previous = 0U,
+    },
+    [BSP_GPIO_USER_SENSOR_CLK] = {
+        .gpio_port = SENSOR_CLK_GPIO_Port,
+        .gpio_pin  = SENSOR_CLK_Pin,
+        .callback  = {
+            .function = NULL,
+            .arg      = NULL,
+        },
+        .debounce = 0U,
+        .previous = 0U,
+    },
+    [BSP_GPIO_USER_SENSOR_SOLENOID] = {
+        .gpio_port = SENSOR_SOLENOID_GPIO_Port,
+        .gpio_pin  = SENSOR_SOLENOID_Pin,
         .callback  = {
             .function = NULL,
             .arg      = NULL,

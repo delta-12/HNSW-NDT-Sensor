@@ -121,7 +121,7 @@ static Bsp_Timer_t *BspTimer_GetTimer(const Bsp_TimerHandle_t *const timer_handl
 {
     Bsp_Timer_t *timer = NULL;
 
-    for (BspTimerUser_Timer_t user_timer = BSP_TIMER_USER_TIMER_0; user_timer < BSP_TIMER_USER_TIMER_MAX; user_timer++)
+    for (BspTimerUser_Timer_t user_timer = BSP_TIMER_USER_TIMER_STEPPER; user_timer < BSP_TIMER_USER_TIMER_MAX; user_timer++)
     {
         if (timer_handle == BspTimerUser_HandleTable[user_timer].timer_handle)
         {

@@ -2,6 +2,7 @@
 #define SENSOR_H
 
 #include "bsp_gpio_user.h"
+#include "bsp_timer_user.h"
 
 typedef enum
 {
@@ -18,6 +19,7 @@ typedef enum
 
 typedef struct
 {
+    BspTimerUser_Timer_t timer;
     BspGpioUser_Pin_t solenoid;
     BspGpioUser_Pin_t adc_clock;
     BspGpioUser_Pin_t adc_bits[SENSOR_ADC_BIT_MAX];
