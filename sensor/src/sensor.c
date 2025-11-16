@@ -70,11 +70,12 @@ void Sensor_Initialize(void)
     (void)BspGpio_Write(sensor.adc_clock, BSP_GPIO_STATE_RESET);
 
     __HAL_TIM_ENABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
+    HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
 }
 
 void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bsp_Callback_t *const callback)
 {
-    if (!sensor.sampling)
+    if (!sensor.sampling && (NULL != buffer))
     {
         sensor.sampling = true;
 
@@ -88,19 +89,34 @@ void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bs
         }
 
         (void)BspTimer_Start(sensor.timer);
-        // (void)HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
-        // (void)HAL_DMA_Start_IT(sensor.dma_handle,
-        //                        (uint32_t)BspGpioUser_HandleTable[sensor.adc_bits[BSP_GPIO_USER_SENSOR_ADC_BIT_0]].gpio_port->IDR,
-        //                        (uint32_t)buffer,
-        //                        count);
-        HAL_DMA_RegisterCallback(&hdma_tim1_up, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
-        HAL_DMA_Start_IT(&hdma_tim1_up, (uint32_t)&GPIOC->IDR, (uint32_t)buffer, count);
+        (void)HAL_DMA_Start_IT(sensor.dma_handle,
+                               (uint32_t)&BspGpioUser_HandleTable[sensor.adc_bits[BSP_GPIO_USER_SENSOR_ADC_BIT_0]].gpio_port->IDR,
+                               (uint32_t)buffer,
+                               count);
     }
 }
 
 bool Sensor_IsSampling(void)
 {
     return sensor.sampling;
+}
+
+void Sensor_ConvertRawSamples(Sensor_Sample_t *const buffer, const uint32_t count)
+{
+    if (NULL != buffer)
+    {
+        for (uint32_t i = 0U; i < count; i++)
+        {
+            uint8_t sample = 0U;
+
+            for (Sensor_AdcBit_t bit = SENSOR_ADC_BIT_0; bit < SENSOR_ADC_BIT_MAX; bit++)
+            {
+                sample |= (uint8_t)((Bsp_GpioPin_t)*(buffer + i) & (BspGpioUser_HandleTable[sensor.adc_bits[bit]].gpio_pin));
+            }
+
+            *(buffer + i) = (uint32_t)sample;
+        }
+    }
 }
 
 static void Sensor_Callback(const DMA_HandleTypeDef *const hdma)

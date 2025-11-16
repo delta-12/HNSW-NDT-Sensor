@@ -7,7 +7,7 @@
 
 #include "sensor.h"
 
-#define SAMPLE_SIZE 100
+#define SAMPLE_SIZE 3000
 
 static uint32_t samples[SAMPLE_SIZE];
 
@@ -21,6 +21,7 @@ int main(void)
     while (Sensor_IsSampling())
     {
     }
+    Sensor_ConvertRawSamples(samples, SAMPLE_SIZE);
 
     BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_SET);
 
