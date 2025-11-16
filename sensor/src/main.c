@@ -1,27 +1,28 @@
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "bsp.h"
+#include "bsp_gpio.h"
 #include "bsp_gpio_user.h"
-#include "bsp_timer_user.h"
 
 #include "sensor.h"
 
-static Sensor_t sensor = {
-    .timer     = BSP_TIMER_USER_TIMER_SENSOR,
-    .solenoid  = BSP_GPIO_USER_SENSOR_SOLENOID,
-    .adc_clock = BSP_GPIO_USER_SENSOR_CLK,
-    .adc_bits  = {
-        BSP_GPIO_USER_SENSOR_ADC_BIT_0,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_1,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_2,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_3,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_4,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_5,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_6,
-        BSP_GPIO_USER_SENSOR_ADC_BIT_7,
-    }
-};
+#define SAMPLE_SIZE 100
+
+static uint32_t samples[SAMPLE_SIZE];
 
 int main(void)
 {
-    (void)(sensor);
+    Bsp_Initialize();
+    BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_RESET);
+
+    Sensor_Initialize();
+    Sensor_Sample(samples, SAMPLE_SIZE, NULL);
+    while (Sensor_IsSampling())
+    {
+    }
+
+    BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_SET);
 
     return 0;
 }

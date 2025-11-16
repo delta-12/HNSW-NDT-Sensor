@@ -172,6 +172,7 @@ struct Bsp_Spi
 struct Bsp_Timer
 {
     Bsp_TimerHandle_t *timer_handle;
+    bool has_interrupt;
     volatile uint64_t counts_elapsed;
     volatile uint64_t counts_elapsed_shadow;
     volatile uint32_t counts_offset;
