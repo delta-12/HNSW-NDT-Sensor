@@ -88,6 +88,9 @@ void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bs
             sensor.callback.function = NULL;
         }
 
+        /* TODO solenoid */
+        /* TODO theshold condition */
+
         (void)BspTimer_Start(sensor.timer);
         (void)HAL_DMA_Start_IT(sensor.dma_handle,
                                (uint32_t)&BspGpioUser_HandleTable[sensor.adc_bits[BSP_GPIO_USER_SENSOR_ADC_BIT_0]].gpio_port->IDR,
