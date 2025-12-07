@@ -9,6 +9,8 @@
 #include "bsp.h"
 #include "bsp_gpio.h"
 #include "bsp_gpio_user.h"
+#include "bsp_pwm.h"
+#include "bsp_pwm_user.h"
 #include "bsp_timer.h"
 #include "bsp_timer_user.h"
 
@@ -30,7 +32,8 @@ typedef struct
     BspTimerUser_Timer_t timer;
     DMA_HandleTypeDef *dma_handle;
     BspGpioUser_Pin_t solenoid;
-    BspGpioUser_Pin_t adc_clock;
+    BspPwmUser_Timer_t adc_clock_timer;
+    Bsp_TimerChannel_t adc_clock_channel;
     BspGpioUser_Pin_t adc_bits[SENSOR_ADC_BIT_MAX];
     volatile bool sampling;
     Bsp_Callback_t callback;
@@ -39,11 +42,12 @@ typedef struct
 extern DMA_HandleTypeDef hdma_tim1_up;
 
 static Sensor_t sensor = {
-    .timer      = BSP_TIMER_USER_TIMER_SENSOR,
-    .dma_handle = &hdma_tim1_up,
-    .solenoid   = BSP_GPIO_USER_SENSOR_SOLENOID,
-    .adc_clock  = BSP_GPIO_USER_SENSOR_CLK,
-    .adc_bits   = {
+    .timer             = BSP_TIMER_USER_TIMER_SENSOR,
+    .dma_handle        = &hdma_tim1_up,
+    .solenoid          = BSP_GPIO_USER_SENSOR_SOLENOID,
+    .adc_clock_timer   = BSP_PWM_USER_TIMER_0,
+    .adc_clock_channel = BSP_TIMER_CHANNEL_1,
+    .adc_bits          = {
         BSP_GPIO_USER_SENSOR_ADC_BIT_0,
         BSP_GPIO_USER_SENSOR_ADC_BIT_1,
         BSP_GPIO_USER_SENSOR_ADC_BIT_2,
@@ -67,7 +71,6 @@ void Sensor_Initialize(void)
     sensor.sampling = false;
 
     (void)BspGpio_Write(sensor.solenoid, BSP_GPIO_STATE_RESET);
-    (void)BspGpio_Write(sensor.adc_clock, BSP_GPIO_STATE_RESET);
 
     __HAL_TIM_ENABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
     HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
@@ -88,7 +91,14 @@ void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bs
             sensor.callback.function = NULL;
         }
 
-        /* TODO solenoid */
+        (void)BspPwm_Start(sensor.adc_clock_timer, sensor.adc_clock_channel);
+        (void)BspPwm_SetDutyCycle(sensor.adc_clock_timer, sensor.adc_clock_channel, 0.50);
+
+        (void)BspGpio_Write(sensor.solenoid, BSP_GPIO_STATE_SET);
+        Bsp_Delay(80U);
+        (void)BspGpio_Write(sensor.solenoid, BSP_GPIO_STATE_RESET);
+        Bsp_Delay(15U);
+
         /* TODO theshold condition */
 
         (void)BspTimer_Start(sensor.timer);
@@ -128,6 +138,7 @@ static void Sensor_Callback(const DMA_HandleTypeDef *const hdma)
     {
         sensor.sampling = false;
         (void)BspTimer_Stop(sensor.timer);
+        (void)BspPwm_Stop(sensor.adc_clock_timer, sensor.adc_clock_channel);
 
         if (NULL != sensor.callback.function)
         {

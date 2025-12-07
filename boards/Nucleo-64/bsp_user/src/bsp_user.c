@@ -12,6 +12,7 @@ void BspUser_Initialize(void)
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
     MX_TIM1_Init();
+    MX_TIM2_Init();
     MX_TIM10_Init();
     MX_TIM11_Init();
 }
