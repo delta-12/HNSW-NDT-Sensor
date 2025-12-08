@@ -65,15 +65,13 @@ static Sensor_t sensor = {
 };
 
 static void Sensor_Callback(const DMA_HandleTypeDef *const hdma);
+static void Sensor_ResetDma(void);
 
 void Sensor_Initialize(void)
 {
     sensor.sampling = false;
 
     (void)BspGpio_Write(sensor.solenoid, BSP_GPIO_STATE_RESET);
-
-    // __HAL_TIM_ENABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
-    HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
 }
 
 void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bsp_Callback_t *const callback)
@@ -101,15 +99,13 @@ void Sensor_Sample(Sensor_Sample_t *const buffer, const uint32_t count, const Bs
 
         /* TODO theshold condition */
 
-        //  __HAL_TIM_DISABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
-        // HAL_DMA_Abort(sensor.dma_handle);   // Fully reset DMA stream
+        Sensor_ResetDma();
         __HAL_TIM_ENABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
-
+        (void)BspTimer_Start(sensor.timer);
         (void)HAL_DMA_Start_IT(sensor.dma_handle,
                                (uint32_t)&BspGpioUser_HandleTable[sensor.adc_bits[BSP_GPIO_USER_SENSOR_ADC_BIT_0]].gpio_port->IDR,
                                (uint32_t)buffer,
                                count);
-        (void)BspTimer_Start(sensor.timer);
     }
 }
 
@@ -144,24 +140,18 @@ static void Sensor_Callback(const DMA_HandleTypeDef *const hdma)
         (void)BspTimer_Stop(sensor.timer);
         (void)BspPwm_Stop(sensor.adc_clock_timer, sensor.adc_clock_channel);
 
-        __HAL_TIM_DISABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
-
-        /* Fully reset DMA */
-        HAL_DMA_Abort(sensor.dma_handle);               // stop
-        HAL_DMA_DeInit(sensor.dma_handle);              // deinit registers
-
-        __HAL_DMA_CLEAR_FLAG(sensor.dma_handle, DMA_FLAG_TCIF0_4 | DMA_FLAG_HTIF0_4 | DMA_FLAG_TEIF0_4);
-        sensor.dma_handle->State = HAL_DMA_STATE_READY;
-
-        HAL_DMA_Init(sensor.dma_handle);                // reinit registers
-
-        HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
-
-        __HAL_TIM_SET_COUNTER(BspTimerUser_HandleTable[sensor.timer].timer_handle, 0);
-
         if (NULL != sensor.callback.function)
         {
             sensor.callback.function(sensor.callback.arg);
         }
     }
+}
+
+static void Sensor_ResetDma(void)
+{
+    __HAL_TIM_DISABLE_DMA(BspTimerUser_HandleTable[sensor.timer].timer_handle, TIM_DMA_UPDATE);
+    HAL_DMA_Abort(sensor.dma_handle);
+    HAL_DMA_DeInit(sensor.dma_handle);
+    HAL_DMA_Init(sensor.dma_handle);
+    HAL_DMA_RegisterCallback(sensor.dma_handle, HAL_DMA_XFER_CPLT_CB_ID, (void (*)(DMA_HandleTypeDef *)) Sensor_Callback);
 }
