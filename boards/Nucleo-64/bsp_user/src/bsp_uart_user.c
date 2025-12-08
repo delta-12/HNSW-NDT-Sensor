@@ -8,7 +8,7 @@
 #include "bsp.h"
 
 #define BSP_UART_USER_0_BUFFER_SIZE 1024U
-#define BSP_UART_USER_1_BUFFER_SIZE 1024U
+#define BSP_UART_USER_1_BUFFER_SIZE 4096U
 
 static uint8_t BspUartUser_LogTxBuffer[BSP_UART_USER_0_BUFFER_SIZE];
 static uint8_t BspUartUser_CommsTxBuffer[BSP_UART_USER_1_BUFFER_SIZE];

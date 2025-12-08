@@ -35,6 +35,7 @@ set(SENSOR_INC_DIR ${SENSOR_DIR}/inc)
 set(SENSOR_SRC_DIR ${SENSOR_DIR}/src)
 
 set(SENSOR_SRCS
+    ${SENSOR_SRC_DIR}/cobs.c
     ${SENSOR_SRC_DIR}/main.c
     ${SENSOR_SRC_DIR}/sensor.c
 )
