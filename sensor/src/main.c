@@ -8,14 +8,14 @@
 #include "bsp_uart.h"
 #include "bsp_uart_user.h"
 
+#include "a4988.h"
+
 #include "cobs.h"
 #include "sensor.h"
 
-#define SAMPLE_SIZE            3000
-#define SERIAL_DELIMITER_0     0xAAU
-#define SERIAL_DELIMITER_1     0x55U
-#define SERIAL_SAMPLE_START    0x01U
-#define SERIAL_SAMPLE_COMPLETE 0x02U
+#define SAMPLE_SIZE        3000U
+#define SERIAL_DELIMITER_0 0xAAU
+#define SERIAL_DELIMITER_1 0x55U
 
 typedef enum
 {
@@ -25,9 +25,23 @@ typedef enum
     SERIAL_BYTE_MAX
 } Serial_Byte_t;
 
-static uint32_t samples[SAMPLE_SIZE];
-static uint8_t  serial_buffer[4096U];
-static uint8_t  serial_encoding_buffer[sizeof(serial_buffer)];
+typedef enum
+{
+    SERIAL_COMMAND_SAMPLE_START = 0x01U,
+    SERIAL_COMMAND_SAMPLE_COMPLETE = 0x02U,
+    SERIAL_COMMAND_STEPPER_LOWER = 0x03U,
+    SERIAL_COMMAND_STEPPER_RAISE = 0x04U
+} Serial_Command_t;
+
+static uint32_t        samples[SAMPLE_SIZE];
+static uint8_t         serial_buffer[4096U];
+static uint8_t         serial_encoding_buffer[sizeof(serial_buffer)];
+static A9488_Context_t stepper_motor = {
+    .timer       = BSP_TIMER_USER_TIMER_STEPPER,
+    .step        = BSP_GPIO_USER_PIN_STEPPER_MOTOR_STEP,
+    .direction   = BSP_GPIO_USER_PIN_STEPPER_MOTOR_DIRECTION,
+    .half_pulses = 0U,
+};
 
 static void Task(void);
 
@@ -37,6 +51,7 @@ int main(void)
     (void)BspUart_Start(BSP_UART_USER_1);
     (void)BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_RESET);
 
+    A4988_Initialize(&stepper_motor);
     Sensor_Initialize();
 
     while (true)
@@ -74,35 +89,47 @@ static void Task(void)
 
         if ((SIZE_MAX != size) &&
             (SERIAL_DELIMITER_0 == serial_encoding_buffer[SERIAL_BYTE_DELIMITER_0]) &&
-            (SERIAL_DELIMITER_1 == serial_encoding_buffer[SERIAL_BYTE_DELIMITER_1]) &&
-            (SERIAL_SAMPLE_START == serial_encoding_buffer[SERIAL_BYTE_COMMAND]))
+            (SERIAL_DELIMITER_1 == serial_encoding_buffer[SERIAL_BYTE_DELIMITER_1]))
         {
-            (void)BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_RESET);
-            Sensor_Sample(samples, SAMPLE_SIZE, NULL);
-            while (Sensor_IsSampling())
+            if (SERIAL_COMMAND_SAMPLE_START == serial_encoding_buffer[SERIAL_BYTE_COMMAND])
             {
-            }
-            Sensor_ConvertRawSamples(samples, SAMPLE_SIZE);
+                (void)BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_RESET);
+                Sensor_Sample(samples, SAMPLE_SIZE, NULL);
+                while (Sensor_IsSampling())
+                {
+                }
+                Sensor_ConvertRawSamples(samples, SAMPLE_SIZE);
 
-            serial_encoding_buffer[SERIAL_BYTE_COMMAND] = SERIAL_SAMPLE_COMPLETE;
-            for (size_t i = SERIAL_BYTE_MAX; i < SAMPLE_SIZE + SERIAL_BYTE_MAX; i++)
-            {
-                serial_encoding_buffer[i] = (uint8_t)samples[i - SERIAL_BYTE_MAX];
-            }
-            size = Cobs_Encode(serial_encoding_buffer, SAMPLE_SIZE + SERIAL_BYTE_MAX, serial_buffer, sizeof(serial_buffer));
-            if (SIZE_MAX != size)
-            {
-                error = BspUart_Transmit(BSP_UART_USER_1, serial_buffer, size);
-            }
+                serial_encoding_buffer[SERIAL_BYTE_COMMAND] = SERIAL_COMMAND_SAMPLE_COMPLETE;
+                for (size_t i = SERIAL_BYTE_MAX; i < SAMPLE_SIZE + SERIAL_BYTE_MAX; i++)
+                {
+                    serial_encoding_buffer[i] = (uint8_t)samples[i - SERIAL_BYTE_MAX];
+                }
+                size = Cobs_Encode(serial_encoding_buffer, SAMPLE_SIZE + SERIAL_BYTE_MAX, serial_buffer, sizeof(serial_buffer));
+                if (SIZE_MAX != size)
+                {
+                    error = BspUart_Transmit(BSP_UART_USER_1, serial_buffer, size);
+                }
 
-            if (BSP_ERROR_NONE == error)
-            {
-                BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_SET);
+                if (BSP_ERROR_NONE == error)
+                {
+                    BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_SET);
+                }
+                else
+                {
+                    (void)BspUart_Stop(BSP_UART_USER_1);
+                    (void)BspUart_Start(BSP_UART_USER_1);
+                }
             }
-            else
+            else if (SERIAL_COMMAND_STEPPER_LOWER == serial_encoding_buffer[SERIAL_BYTE_COMMAND])
             {
-                (void)BspUart_Stop(BSP_UART_USER_1);
-                (void)BspUart_Start(BSP_UART_USER_1);
+                (void)A4988_Move(&stepper_motor, -5 * 200 * 16);
+                Bsp_Delay(3000);
+            }
+            else if (SERIAL_COMMAND_STEPPER_RAISE == serial_encoding_buffer[SERIAL_BYTE_COMMAND])
+            {
+                (void)A4988_Move(&stepper_motor, 5 * 200 * 16);
+                Bsp_Delay(3000);
             }
         }
     }
