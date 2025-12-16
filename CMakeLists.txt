@@ -16,7 +16,7 @@ message("Board: " ${BOARD})
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Project with support for ASM and C languages
-project(HNSW_NDE_Sensor LANGUAGES C ASM)
+project(HNSW-NDT-Sensor LANGUAGES C ASM)
 
 # Collection functions
 include(${CMAKE_SOURCE_DIR}/collect.cmake)

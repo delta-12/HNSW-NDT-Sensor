@@ -5,7 +5,7 @@
             "name": "Nucleo-64 Flash and Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Nucleo-64_Debug/HNSW_NDE_Sensor.elf",
+            "program": "${workspaceFolder}/build/Nucleo-64_Debug/HNSW-NDT-Sensor.elf",
             "MIMode": "gdb",
             "cwd": "${workspaceRoot}",
             "stopAtConnect": true,
@@ -20,7 +20,7 @@
                 },
                 {
                     "description": "Flash program",
-                    "text": "load ${workspaceFolder}/build/Nucleo-64_Debug/HNSW_NDE_Sensor.elf",
+                    "text": "load ${workspaceFolder}/build/Nucleo-64_Debug/HNSW-NDT-Sensor.elf",
                     "ignoreFailures": false
                 },
                 {
@@ -34,7 +34,7 @@
             "name": "Nucleo-64 Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/Nucleo-64_Debug/HNSW_NDE_Sensor.elf",
+            "program": "${workspaceFolder}/build/Nucleo-64_Debug/HNSW-NDT-Sensor.elf",
             "MIMode": "gdb",
             "cwd": "${workspaceRoot}",
             "stopAtConnect": true,
