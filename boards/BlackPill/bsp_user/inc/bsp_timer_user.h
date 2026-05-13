@@ -6,6 +6,7 @@
 typedef enum
 {
     BSP_TIMER_USER_TIMER_STEPPER,
+    BSP_TIMER_USER_TIMER_SENSOR,
     BSP_TIMER_USER_TIMER_MAX
 } BspTimerUser_Timer_t;
 
