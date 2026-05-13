@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<suppressions>
+
+    <!-- Suppress static linkage for functions to be used outside of translation unit -->
+    <suppress>
+        <id>staticFunction</id>
+        <symbolName>A4988_GetRemainingSteps</symbolName>
+    </suppress>
+
+</suppressions>

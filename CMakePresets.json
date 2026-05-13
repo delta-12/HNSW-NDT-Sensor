@@ -11,36 +11,64 @@
             "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/${presetName}",
-		    "toolchainFile": "${sourceDir}/toolchain.cmake",
-            "cacheVariables": {
-                "BOARD": "Nucleo-64",
-                "LINKER_SCRIPT": "stm32f411retx_flash.ld"
-            }
+            "toolchainFile": "${sourceDir}/toolchain.cmake"
         },
         {
             "name": "Nucleo-64_Debug",
             "inherits": "default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BOARD": "Nucleo-64",
+                "LINKER_SCRIPT": "stm32f411retx_flash.ld"
             }
         },
         {
             "name": "Nucleo-64_RelWithDebInfo",
-            "inherits": "default",
+            "inherits": "Nucleo-64_Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"
             }
         },
         {
             "name": "Nucleo-64_Release",
-            "inherits": "default",
+            "inherits": "Nucleo-64_Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
             "name": "Nucleo-64_MinSizeRel",
+            "inherits": "Nucleo-64_Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "MinSizeRel"
+            }
+        },
+        {
+            "name": "BlackPill_Debug",
             "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BOARD": "BlackPill",
+                "LINKER_SCRIPT": "stm32f411ceux_flash.ld"
+            }
+        },
+        {
+            "name": "BlackPill_RelWithDebInfo",
+            "inherits": "BlackPill_Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "BlackPill_Release",
+            "inherits": "BlackPill_Debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "BlackPill_MinSizeRel",
+            "inherits": "BlackPill_Debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "MinSizeRel"
             }
@@ -62,6 +90,22 @@
         {
             "name": "Nucleo-64_MinSizeRel",
             "configurePreset": "Nucleo-64_MinSizeRel"
+        },
+        {
+            "name": "BlackPill_Debug",
+            "configurePreset": "BlackPill_Debug"
+        },
+        {
+            "name": "BlackPill_RelWithDebInfo",
+            "configurePreset": "BlackPill_RelWithDebInfo"
+        },
+        {
+            "name": "BlackPill_Release",
+            "configurePreset": "BlackPill_Release"
+        },
+        {
+            "name": "BlackPill_MinSizeRel",
+            "configurePreset": "BlackPill_MinSizeRel"
         }
     ]
 }
