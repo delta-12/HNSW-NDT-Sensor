@@ -6,8 +6,8 @@
 
 Bsp_Gpio_t BspGpioUser_HandleTable[BSP_GPIO_USER_PIN_MAX] = {
     [BSP_GPIO_USER_PIN_LED] = {
-        .gpio_port = LD2_GPIO_Port,
-        .gpio_pin  = LD2_Pin,
+        .gpio_port = LED_BLUE_GPIO_Port,
+        .gpio_pin  = LED_BLUE_Pin,
         .mode      = BSP_GPIO_MODE_OUTPUT,
         .callback  = {
             .function = NULL,
