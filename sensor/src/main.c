@@ -6,6 +6,7 @@
 #include "bsp_gpio.h"
 #include "bsp_gpio_user.h"
 #include "bsp_logger.h"
+#include "bsp_tick.h"
 #include "bsp_uart.h"
 #include "bsp_uart_user.h"
 
@@ -13,6 +14,7 @@
 
 #include "cobs.h"
 #include "sensor.h"
+#include "version.h"
 
 #define SAMPLE_SIZE        3000U
 #define SERIAL_DELIMITER_0 0xAAU
@@ -50,6 +52,13 @@ static void Task(void);
 int main(void)
 {
     Bsp_Initialize();
+
+    /* Immediately print out build info in case there is a problem starting BSP tick */
+    BSP_LOGGER_LOG_INFO(log_tag, "Build branch: %s", HNSW_NDT_SENSOR_GIT_BRANCH);
+    BSP_LOGGER_LOG_INFO(log_tag, "Build commit: %s (%s)", HNSW_NDT_SENSOR_GIT_COMMIT_HASH, HNSW_NDT_SENSOR_GIT_DIRTY);
+    BSP_LOGGER_LOG_INFO(log_tag, "Build tag: %s", HNSW_NDT_SENSOR_GIT_TAG);
+
+    (void)BspTick_Start();
     (void)BspUart_Start(BSP_UART_USER_1);
     (void)BspGpio_Write(BSP_GPIO_USER_PIN_LED, BSP_GPIO_STATE_RESET);
 

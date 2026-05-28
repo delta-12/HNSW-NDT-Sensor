@@ -28,11 +28,52 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/boards)
 add_subdirectory(${CMAKE_SOURCE_DIR}/drivers)
 
 ################################################################################
+# Versioning
+################################################################################
+execute_process(
+    COMMAND git rev-parse HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_COMMIT_HASH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git rev-parse --abbrev-ref HEAD
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_BRANCH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git describe --tags --always
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_TAG
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+execute_process(
+    COMMAND git status --porcelain
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    OUTPUT_VARIABLE GIT_STATUS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(GIT_STATUS)
+    set(GIT_DIRTY "Dirty")
+else()
+    set(GIT_DIRTY "Clean")
+endif()
+
+################################################################################
 # Sensor firmware
 ################################################################################
 set(SENSOR_DIR ${CMAKE_SOURCE_DIR}/sensor)
 set(SENSOR_INC_DIR ${SENSOR_DIR}/inc)
+set(GENERATED_INC_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 set(SENSOR_SRC_DIR ${SENSOR_DIR}/src)
+
+set(GENERATED_VERSION_HEADER ${GENERATED_INC_DIR}/version.h)
+configure_file(
+    ${SENSOR_INC_DIR}/version.h.in
+    ${GENERATED_VERSION_HEADER}
+    @ONLY
+)
 
 set(SENSOR_SRCS
     ${SENSOR_SRC_DIR}/cobs.c
@@ -51,6 +92,7 @@ add_executable(${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${SENSOR_INC_DIR}
+        ${GENERATED_INC_DIR}
 )
 
 target_sources(${PROJECT_NAME}
